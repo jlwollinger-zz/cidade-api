@@ -2,8 +2,6 @@ package br.com.cidade.model.entity;
 
 import java.io.Serializable;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,7 +25,7 @@ public class Cidade implements Serializable {
 	private Long ibgeId;
 	
 	@Column(name="UF")
-	private String Uf;
+	private String uf;
 	
 	@Column(name="name")
 	private String nome;
@@ -57,7 +55,7 @@ public class Cidade implements Serializable {
 	public Cidade(Long ibgeId, String uf, String nome, Boolean capital, Double longitude, Double latitude,
 			String noAccents, String alternativeNames, String microRegiao, String mesoRegiao) {
 		this.ibgeId = ibgeId;
-		this.Uf = uf;
+		this.uf = uf;
 		this.nome = nome;
 		this.capital = capital;
 		this.longitude = longitude;
@@ -85,11 +83,11 @@ public class Cidade implements Serializable {
 	}
 
 	public String getUf() {
-		return Uf;
+		return uf;
 	}
 
 	public void setUf(String uf) {
-		Uf = uf;
+		this.uf = uf;
 	}
 
 	public String getNome() {

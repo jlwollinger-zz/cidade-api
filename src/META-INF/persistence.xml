@@ -5,7 +5,7 @@
 	<class>br.com.desafio.model.entity.Cidade</class>
 	<exclude-unlisted-classes>true</exclude-unlisted-classes>
 	<properties>
-		<property name="javax.persistence.jdbc.url" value="$objectdb/db/desafio-senior.odb" />
+		<property name="javax.persistence.jdbc.url" value="$objectdb/db/cidade-api.odb" />
 		<property name="javax.persistence.jdbc.user" value="admin" />
 		<property name="javax.persistence.jdbc.password" value="admin" />
 	</properties>

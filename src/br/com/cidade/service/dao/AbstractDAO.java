@@ -22,10 +22,7 @@ public class AbstractDAO<T> {
 	}
 
 	public T save(T entity) {
-		try {
-			return getEntityManager().merge(entity);
-		} finally {
-		}
+		return getEntityManager().merge(entity);
 	}
 
 	public void delete(T entity) {
@@ -33,20 +30,8 @@ public class AbstractDAO<T> {
 	}
 
 	public void deleteAll(String entityName) {
-		String jpql = "delete from " + entityName;
-		getEntityManager().createQuery(jpql).executeUpdate();
+		getEntityManager().createQuery("delete from " + entityName)
+		.executeUpdate();
 	}
 	
-	public void refresh(T entity) {
-		getEntityManager().refresh(getEntityManager().merge(entity));
-	}
-
-	public T merge(T entity) {
-		return getEntityManager().merge(entity);
-	}
-
-	public void flush() {
-		getEntityManager().flush();
-	}
-
 }
