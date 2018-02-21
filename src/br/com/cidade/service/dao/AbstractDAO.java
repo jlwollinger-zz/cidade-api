@@ -14,7 +14,7 @@ public class AbstractDAO<T> {
 		return em;
 	}
 
-	@PersistenceContext
+	@PersistenceContext(name="cidade-api-pu")
 	private EntityManager em;
 
 	public void persist(T entity) {

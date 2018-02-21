@@ -56,7 +56,6 @@ public class Cidade implements Serializable {
 	
 	public Cidade(Long ibgeId, String uf, String nome, Boolean capital, Double longitude, Double latitude,
 			String noAccents, String alternativeNames, String microRegiao, String mesoRegiao) {
-
 		this.ibgeId = ibgeId;
 		this.Uf = uf;
 		this.nome = nome;
@@ -156,20 +155,5 @@ public class Cidade implements Serializable {
 	public void setMesoRegiao(String mesoRegiao) {
 		this.mesoRegiao = mesoRegiao;
 	}
-	
-    public JsonObjectBuilder toJson() {
-        return Json.createObjectBuilder()
-        .add("ibge_Id", ibgeId)
-        .add("UF", Uf)
-        .add("nome", nome)
-        .add("capital", isCapital() ? "Sim" : "Não")
-        .add("longitude", longitude)
-        .add("latitude", latitude)
-        .add("noAccents", noAccents)
-        .add("alternativeNames", alternativeNames)
-        .add("microRegiao", microRegiao)
-        .add("mesoRegiao", mesoRegiao);
-        
-       
-    }
+
 }
