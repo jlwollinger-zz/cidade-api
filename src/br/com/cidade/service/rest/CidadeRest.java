@@ -3,6 +3,7 @@ package br.com.cidade.service.rest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import br.com.cidade.model.EntryRest;
+import br.com.cidade.model.dto.CidadeNomeLatLongDTO;
 import br.com.cidade.model.dto.DistanciaCidadeDTO;
 import br.com.cidade.model.entity.Cidade;
 import br.com.cidade.service.CidadeEntityLoader;
@@ -32,19 +34,19 @@ import br.com.cidade.uti.RestUtil;
 @Stateless
 @Path("/cidade")
 public class CidadeRest {
-	    //TODO: arrumar URLs
-		//TODO: arrumar repostas de erro
-		//TODO: arrumar calculo de maior ditancia (ineficiente)
-		
-		@Inject
-		private CidadeDAO cidadeDAO;
-		
+	
+	private static final long SAMPLE_IBGEID = 1100015l;
+	
+	@Inject
+	private CidadeDAO cidadeDAO;
+
 	@GET
 	@Path("readcsv")
 	public Response readCSV() {
 		try {
-			//if(cidadeDAO.findByIbgeId(1200435l) != null)
-			//	cidadeDAO.deleteAll(Cidade.class.getSimpleName());
+			if (cidadeDAO.findByIbgeId(SAMPLE_IBGEID) != null) {
+				cidadeDAO.deleteAll(Cidade.class.getSimpleName());
+			}
 			List<Cidade> listCidade = CidadeEntityLoader.loadCidadesFromCsvFile();
 			listCidade.forEach(cidade -> cidadeDAO.save(cidade));
 
@@ -71,7 +73,7 @@ public class CidadeRest {
 	public Response getEstadosComMaiorEMenorQuantidadeDeCidades() {
 		try {
 			List<EntryRest> entry = cidadeDAO.getQuantidadeDeCidadesPorEstado();
-			return Response.ok(sortAndReturnByQuantidadeDeCidadesMaiorEMenor(entry)).build();
+			return Response.ok(sortAndReturnByValueWithBiggestAndSmallest(entry)).build();
 		} catch (Exception e) {
 			return RestUtil.buildResponseBadRequest(e.getMessage());
 		}
@@ -146,7 +148,7 @@ public class CidadeRest {
 
 	@GET
 	@Path("/total/{coluna}/semrepetidos")
-	public Response getQuantidadeRegistroBaseadoEmColuna(@PathParam("coluna") String coluna) {
+	public Response getQuantidadeRegistroByEmColuna(@PathParam("coluna") String coluna) {
 		try {
 			return Response.ok(cidadeDAO.getQuantidadeRegistrosNotRepetidos(coluna)).build();
 		} catch (Exception e) {
@@ -165,45 +167,29 @@ public class CidadeRest {
 	}
 
 	@GET
-	@Path("/get/maiordistanciaentrecidades")
+	@Path("/get/maiordistancia/cidades")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCidadesComMaiorDistanciaEntreElas() {
-		try{ 
-		List<Cidade> listCidades = cidadeDAO.getTodasCidades();
-		List<DistanciaCidadeDTO> listDitancia = new ArrayList();
-		for (Cidade cidade1 : listCidades) {
-			for (Cidade cidade2 : listCidades) {
-				if (cidade1.getIbgeId() != cidade2.getIbgeId()) {
-					listDitancia.add(new DistanciaCidadeDTO(cidade1.getNome(), cidade2.getNome(),
-							getDistancia(cidade1, cidade2)));
-				}
-			}
-		}
-		Collections.sort(listDitancia);
-		List<DistanciaCidadeDTO> listClean = new ArrayList();
+		try {
+			List<CidadeNomeLatLongDTO> listCidadesNomeLatLong = cidadeDAO.findAllCidadeNomeLatLongDTO();
+			List<DistanciaCidadeDTO> listDitanciaCidadeDTO = new ArrayList();
 
-		return Response.ok(listClean.get(0)).build();
+			for (CidadeNomeLatLongDTO cidade : listCidadesNomeLatLong) {
+				getDistancia(cidade, listCidadesNomeLatLong, listDitanciaCidadeDTO);
+			}
+			Collections.sort(listDitanciaCidadeDTO);
+
+		return Response.ok(listDitanciaCidadeDTO.get(0)).build();
 		} catch (Exception e) {
 			return RestUtil.buildResponseBadRequest(e.getMessage());
 		}
 	}
 
-	private Double getDistancia(Cidade cidade1, Cidade cidade2) {
-		return distance(cidade1.getLatitude(), cidade1.getLongitude(), cidade2.getLatitude(), cidade2.getLongitude());
-	}
-
-	private List<EntryRest> sortAndReturnByQuantidadeDeCidadesMaiorEMenor(List<EntryRest> entry) {
-		Collections.sort(entry, new Comparator<EntryRest>() {
-
-			@Override
-			public int compare(EntryRest o1, EntryRest o2) {
-				return o1.valueAsInt() - o2.valueAsInt();
-			}
-		});
-		List<EntryRest> result = new ArrayList(2);
-		result.add(entry.get(0));
-		result.add(entry.get(entry.size() - 1));
-		return result;
+	private void getDistancia(CidadeNomeLatLongDTO cidade, List<CidadeNomeLatLongDTO> listCidade, List<DistanciaCidadeDTO> listDitancia) {
+		for (CidadeNomeLatLongDTO aCidade : listCidade) {
+			listDitancia.add(new DistanciaCidadeDTO(cidade.getNome(), aCidade.getNome(),
+					distance(cidade.getLat(), cidade.getLon(), aCidade.getLat(), aCidade.getLon())));
+		}
 	}
 
 	private double distance(double lat1, double lon1, double lat2, double lon2) {
@@ -224,6 +210,20 @@ public class CidadeRest {
 
 	private double rad2deg(double rad) {
 		return (rad * 180 / Math.PI);
+	}
+	
+	private List<EntryRest> sortAndReturnByValueWithBiggestAndSmallest(List<EntryRest> entry) {
+		Collections.sort(entry, new Comparator<EntryRest>() {
+
+			@Override
+			public int compare(EntryRest o1, EntryRest o2) {
+				return o1.valueAsInt() - o2.valueAsInt();
+			}
+		});
+		List<EntryRest> result = new ArrayList(2);
+		result.add(entry.get(0));
+		result.add(entry.get(entry.size() - 1));
+		return result;
 	}
 
 }

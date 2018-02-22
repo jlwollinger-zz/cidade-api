@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ejb.Stateless;
 
 import br.com.cidade.model.EntryRest;
+import br.com.cidade.model.dto.CidadeNomeLatLongDTO;
 import br.com.cidade.model.entity.Cidade;
 
 /**
@@ -71,8 +72,9 @@ public class CidadeDAO extends AbstractDAO<Cidade>{
 				.getResultList();
 	}
 
-	public List<Cidade> getTodasCidades() {
-		return getEntityManager().createQuery("select c from Cidade c", Cidade.class)
+	public List<CidadeNomeLatLongDTO> findAllCidadeNomeLatLongDTO() {
+		return getEntityManager().createQuery("select new br.com.cidade.model.dto.CidadeNomeLatLongDTO"
+				+ "(c.nome, c.longitude, c.latitude) from Cidade c", CidadeNomeLatLongDTO.class)
 				.getResultList();
 	}
 
