@@ -15,8 +15,8 @@ import br.com.cidade.model.entity.Cidade;
 @Stateless
 public class CidadeDAO extends AbstractDAO<Cidade>{
 
-
 	public Cidade getCidadeByIbgeId(Long ibgeId) {
+		
 		return getEntityManager().createQuery("select c from Cidade c " 
 				+ "where c.ibgeId = ?1", Cidade.class)
 				.setParameter(1, ibgeId)
@@ -37,9 +37,9 @@ public class CidadeDAO extends AbstractDAO<Cidade>{
 	}
 	
 	public List<EntryRest> getQuantidadeDeCidadesPorEstado(){
-		return getEntityManager().createQuery("select new br.com.desafio.entity.EntryRest(c.Uf, count(c.nome)) "
+		return getEntityManager().createQuery("select new br.com.cidade.model.EntryRest(c.uf, count(c.nome)) "
 				+ "from Cidade c "
-				+ "group by c.Uf")
+				+ "group by c.uf", EntryRest.class)
 				.getResultList();
 	}
 	
@@ -48,24 +48,26 @@ public class CidadeDAO extends AbstractDAO<Cidade>{
 				.getSingleResult();
 	}
 
-	public List<String> getTextFilterByString(String coluna, String texto) {
-		return getEntityManager().createQuery("select c." + coluna + " from Cidade c "
-				+ "where c." + coluna 
+	public List<String> getTextFilterByString(String coluna, String texto) throws Exception {
+		String field = Cidade.getFieldByColumnName(coluna);
+		return getEntityManager().createQuery("select c." + field + " from Cidade c "
+				+ "where c." + field 
 				+ " like ?1", String.class)
 				.setParameter(1, "%" + texto + "%")
 				.getResultList();
 	}
 
-	public Long getQuantidadeRegistrosNotRepetidos(String coluna) {
-		return getEntityManager().createQuery("select distinct count(c." + coluna + ") "
-				+ "from Cidade c", Long.class)
+	public Long getQuantidadeRegistrosNotRepetidos(String coluna) throws Exception {
+		String field = Cidade.getFieldByColumnName(coluna);
+		return getEntityManager().createQuery("select count(distinct c." + field + ") "
+				+ "from Cidade c ",Long.class)
 				.getSingleResult();
 	}
 
 	public List<String> getNomeCidadesPorEstado(String estado) {
 		return getEntityManager().createQuery("select c.nome from Cidade c "
-				+ "where c.Uf = ?1", String.class)
-				.setParameter(1, estado)
+				+ "where c.uf = ?1", String.class)
+				.setParameter(1, estado.toUpperCase())
 				.getResultList();
 	}
 

@@ -13,5 +13,9 @@ public class RestUtil {
 	public static Response buildResponseError(String msg) {
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(msg).build();
 	}
+	
+	public static Response buildResponseBadRequest(String msg) {
+		return Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
+	}
 
 }

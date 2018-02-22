@@ -48,5 +48,4 @@ public class DistanciaCidadeDTO implements Comparable<DistanciaCidadeDTO> {
 		return Double.compare(this.getDistancia(), o.getDistancia());
 	}
 	
-
 }

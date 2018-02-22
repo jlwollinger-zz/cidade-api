@@ -1,6 +1,7 @@
 package br.com.cidade.model.entity;
 
 import java.io.Serializable;
+import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,6 +51,31 @@ public class Cidade implements Serializable {
 	@Column(name="mesoRegion")
 	private String mesoRegiao;
 
+	public static String getFieldByColumnName(String field) throws Exception{
+		switch (field) {
+		case "ibge_id":
+			return "ibgeId";
+		case "UF":
+			return "uf";
+		case "name":
+			return "nome";
+		case "lon":
+			return "longitude";
+		case "lat":
+			return "latitude";
+		case "no_accents":
+			return "noAccents";
+		case "alternative_names":
+			return "alternativeNames";
+		case "microRegion":
+			return "microRegiao";
+		case "mesoRegion":
+			return "mesoRegiao";
+		default:
+			throw new Exception(String.format("Coluna %s não encontrada", field));
+		}
+	}
+	
 	public Cidade(){}
 	
 	public Cidade(Long ibgeId, String uf, String nome, Boolean capital, Double longitude, Double latitude,

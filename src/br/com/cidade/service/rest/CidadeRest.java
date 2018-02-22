@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import br.com.cidade.model.EntryRest;
 import br.com.cidade.model.dto.DistanciaCidadeDTO;
@@ -42,7 +43,8 @@ public class CidadeRest {
 	@Path("readcsv")
 	public Response readCSV() {
 		try {
-			cidadeDAO.deleteAll(Cidade.class.getSimpleName());
+			//if(cidadeDAO.findByIbgeId(1200435l) != null)
+			//	cidadeDAO.deleteAll(Cidade.class.getSimpleName());
 			List<Cidade> listCidade = CidadeEntityLoader.loadCidadesFromCsvFile();
 			listCidade.forEach(cidade -> cidadeDAO.save(cidade));
 
@@ -55,37 +57,57 @@ public class CidadeRest {
 	@GET
 	@Path("/get/capitais")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Cidade> getCapitaisOrderedByNome() {
-		return cidadeDAO.getCapitaisOrderedByNome();
+	public Response getCapitaisOrderedByNome() {
+		try {
+			return Response.ok(cidadeDAO.getCapitaisOrderedByNome()).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@GET
 	@Path("/get/estados/quantidade/cidades/extremo")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<EntryRest> getEstadosComMaiorEMenorQuantidadeDeCidades() {
-		List<EntryRest> entry = cidadeDAO.getQuantidadeDeCidadesPorEstado();
-		return sortAndReturnByQuantidadeDeCidadesMaiorEMenor(entry);
+	public Response getEstadosComMaiorEMenorQuantidadeDeCidades() {
+		try {
+			List<EntryRest> entry = cidadeDAO.getQuantidadeDeCidadesPorEstado();
+			return Response.ok(sortAndReturnByQuantidadeDeCidadesMaiorEMenor(entry)).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@GET
 	@Path("/get/estados/quantidade/cidades")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<EntryRest> getQuantidadeDeCidadesPorEstado() {
-		return cidadeDAO.getQuantidadeDeCidadesPorEstado();
+	public Response getQuantidadeDeCidadesPorEstado() {
+		try {
+			return Response.ok(cidadeDAO.getQuantidadeDeCidadesPorEstado()).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@GET
 	@Path("/get/cidade/{ibgeId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public void getCidadeByIbgeId(@PathParam("ibgeId")Long ibgeId) {
-		cidadeDAO.getCidadeByIbgeId(ibgeId);
+	public Response getCidadeByIbgeId(@PathParam("ibgeId")Long ibgeId) {
+		try {
+			return Response.ok(cidadeDAO.getCidadeByIbgeId(ibgeId)).build();
+		} catch(Exception e){
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
 	}
 
 	@GET
 	@Path("/get/nome/cidade/{estado}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<String> getNomeDeCidadesPorEstado(@PathParam("estado") String estado) {
-		return cidadeDAO.getNomeCidadesPorEstado(estado);
+	public Response getNomeDeCidadesPorEstado(@PathParam("estado") String estado) {
+		try {
+			return Response.ok(cidadeDAO.getNomeCidadesPorEstado(estado)).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@POST
@@ -95,7 +117,7 @@ public class CidadeRest {
 			cidadeDAO.save(cidade);
 			return Response.ok().build();
 		} catch (Exception ex) {
-			return RestUtil.buildResponseError(ex.getMessage());
+			return RestUtil.buildResponseBadRequest(ex.getMessage());
 		}
 	}
 
@@ -113,30 +135,41 @@ public class CidadeRest {
 	@GET
 	@Path("/get/coluna/{coluna}/{texto}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<String> getFilterByString(@PathParam("coluna") String coluna, 
-										  @PathParam("texto") String texto) {
-		return cidadeDAO.getTextFilterByString(coluna, texto);
+	public Response getFilterByString(@PathParam("coluna") String coluna, 
+									  @PathParam("texto") String texto) {
+		try{
+			return Response.ok(cidadeDAO.getTextFilterByString(coluna, texto)).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@GET
 	@Path("/total/{coluna}/semrepetidos")
-	public Long getQuantidadeRegistroBaseadoEmColuna(@PathParam("coluna") String coluna) {
-		return cidadeDAO.getQuantidadeRegistrosNotRepetidos(coluna);
+	public Response getQuantidadeRegistroBaseadoEmColuna(@PathParam("coluna") String coluna) {
+		try {
+			return Response.ok(cidadeDAO.getQuantidadeRegistrosNotRepetidos(coluna)).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@GET
 	@Path("/get/quantidade/registros/total")
-	public Long getQuantidadesRegistroTotal() {
-		return cidadeDAO.getQuantidadesRegistroTotal();
+	public Response getQuantidadesRegistroTotal() {
+		try {
+			return Response.ok(cidadeDAO.getQuantidadesRegistroTotal()).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	@GET
 	@Path("/get/maiordistanciaentrecidades")
 	@Produces(MediaType.APPLICATION_JSON)
-	public DistanciaCidadeDTO getCidadesComMaiorDistanciaEntreElas() {
-
+	public Response getCidadesComMaiorDistanciaEntreElas() {
+		try{ 
 		List<Cidade> listCidades = cidadeDAO.getTodasCidades();
-		System.out.println(listCidades.size());
 		List<DistanciaCidadeDTO> listDitancia = new ArrayList();
 		for (Cidade cidade1 : listCidades) {
 			for (Cidade cidade2 : listCidades) {
@@ -149,7 +182,10 @@ public class CidadeRest {
 		Collections.sort(listDitancia);
 		List<DistanciaCidadeDTO> listClean = new ArrayList();
 
-		return listClean.get(0);
+		return Response.ok(listClean.get(0)).build();
+		} catch (Exception e) {
+			return RestUtil.buildResponseBadRequest(e.getMessage());
+		}
 	}
 
 	private Double getDistancia(Cidade cidade1, Cidade cidade2) {
